@@ -16,7 +16,7 @@
 
 ## 📱 সাধারণ ব্যবহারকারীদের জন্য (কিভাবে ইন্সটল করবেন)
 আপনি যদি শুধু অ্যাপটি আপনার ফোনে ব্যবহার করতে চান, তবে নিচের ধাপগুলো অনুসরণ করুন:
-১. এই পেজের ডানদিকে **[Releases](লিংক-এখানে-দিতে-পারেন)** সেকশনে যান।
+১. এই পেজের ডানদিকে **[Releases](https://release-assets.githubusercontent.com/github-production-release-asset/1253382533/ec3ab443-91c9-4aca-8714-87a218bad9aa?sp=r&sv=2018-11-09&sr=b&spr=https&se=2026-05-30T17%3A00%3A49Z&rscd=attachment%3B+filename%3Dapp-debug.apk&rsct=application%2Fvnd.android.package-archive&skoid=96c2d410-5711-43a1-aedd-ab1947aa7ab0&sktid=398a6654-997b-47e9-b12b-9515b896b4de&skt=2026-05-30T16%3A00%3A03Z&ske=2026-05-30T17%3A00%3A49Z&sks=b&skv=2018-11-09&sig=9nuT1jXArqdKZAvptlLn98ersGb0ulxXuGw5dTHhAoA%3D&jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmVsZWFzZS1hc3NldHMuZ2l0aHVidXNlcmNvbnRlbnQuY29tIiwia2V5Ijoia2V5MSIsImV4cCI6MTc4MDE1ODYzMywibmJmIjoxNzgwMTU2ODMzLCJwYXRoIjoicmVsZWFzZWFzc2V0cHJvZHVjdGlvbi5ibG9iLmNvcmUud2luZG93cy5uZXQifQ.IPhFEwCFZI2arhdDU6sKniKzJb_zlBnpbDq8UxT2GU8&response-content-disposition=attachment%3B%20filename%3Dapp-debug.apk&response-content-type=application%2Fvnd.android.package-archive)** সেকশনে যান।
 ২. সেখান থেকে সর্বশেষ ভার্সনের `.apk` ফাইলটি (যেমন: `app-debug.apk`) ডাউনলোড করুন।
 ৩. আপনার ফোনে ফাইলটি ওপেন করে ইন্সটল করুন। 
    *(বিঃদ্রঃ যেহেতু অ্যাপটি প্লে-স্টোরে নেই, তাই ইন্সটলের সময় Google Play Protect একটি ওয়ার্নিং দিতে পারে। সেক্ষেত্রে **"More details"** এ ক্লিক করে **"Install anyway"** সিলেক্ট করুন।)*
