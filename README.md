@@ -26,4 +26,4 @@
 
 **ধাপ ১:** প্রজেক্টটি ক্লোন (Clone) করুন:
 ```bash
-git clone [[https://github.com/আপন](https://github.com/আপন)ার-ইউজারনেম/আপনার-রিপোজিটরির-নাম.git](https://github.com/biplobc384-dotcom/Voter-list.git)
+git clone https://github.com/biplobc384-dotcom/Voter-list.git
