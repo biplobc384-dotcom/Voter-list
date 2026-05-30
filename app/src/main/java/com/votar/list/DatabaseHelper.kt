@@ -11,8 +11,6 @@ class DatabaseHelper(private val context: Context) : SQLiteOpenHelper(context, D
         private const val DB_NAME = "voter_database.db"
     }
 
-    private val dbPath: String = context.getDatabasePath(DB_NAME).path
-
     init {
         // অ্যাপ ওপেন হলে চেক করবে ডাটাবেস আছে কিনা, না থাকলে কপি করবে
         if (!checkDatabase()) {
@@ -26,9 +24,15 @@ class DatabaseHelper(private val context: Context) : SQLiteOpenHelper(context, D
     }
 
     private fun copyDatabase() {
-        this.readableDatabase // লোকাল স্টোরেজে ফাঁকা ডাটাবেস ফাইল তৈরি করার জন্য
+        val dbFile = context.getDatabasePath(DB_NAME)
+        
+        // বাগ ফিক্স ১: ফাঁকা ডাটাবেস তৈরি না করে ফোল্ডার তৈরি করা হচ্ছে যাতে ক্র্যাশ না করে
+        if (dbFile.parentFile?.exists() == false) {
+            dbFile.parentFile?.mkdirs()
+        }
+
         context.assets.open(DB_NAME).use { inputStream ->
-            FileOutputStream(dbPath).use { outputStream ->
+            FileOutputStream(dbFile).use { outputStream ->
                 inputStream.copyTo(outputStream)
             }
         }
@@ -39,36 +43,48 @@ class DatabaseHelper(private val context: Context) : SQLiteOpenHelper(context, D
 
     fun searchVoters(query: String, gender: String, ward: String): List<VoterResult> {
         val results = mutableListOf<VoterResult>()
-        val db = this.readableDatabase
+        
+        // বাগ ফিক্স ২: Try-Catch ব্লক দেওয়া হলো যাতে যেকোনো কারণে অ্যাপ ক্র্যাশ না করে
+        try {
+            val db = this.readableDatabase
+            val searchPattern = "%$query%"
+            var sql = "SELECT file_name, page_num, clean_text FROM voters WHERE (clean_text LIKE ? OR raw_text LIKE ?)"
+            val args = mutableListOf(searchPattern, searchPattern)
 
-        val searchPattern = "%$query%"
-        var sql = "SELECT file_name, page_num, clean_text FROM voters WHERE (clean_text LIKE ? OR raw_text LIKE ?)"
-        val args = mutableListOf(searchPattern, searchPattern)
+            // জেন্ডার ফিল্টার ফিক্স (বাংলা টেক্সট থেকে ডাটাবেসের male/female এ কনভার্ট)
+            if (!gender.contains("সব") && !gender.contains("উভয়") && gender != "all") {
+                sql += " AND gender = ?"
+                val genderValue = if (gender.contains("পুরুষ") || gender.equals("male", true)) "male" else "female"
+                args.add(genderValue)
+            }
+            
+            // ওয়ার্ড ফিল্টার ফিক্স (ওয়ার্ডের বাংলা নাম থেকে শুধু নম্বরটি বের করা)
+            if (!ward.contains("সব") && !ward.contains("All") && ward != "all") {
+                sql += " AND ward = ?"
+                // যদি স্পিনারে "ওয়ার্ড ৩" থাকে, তবে এটি শুধু "3" বের করে নেবে
+                val wardNumber = ward.replace(Regex("[^0-9]"), "")
+                args.add(if (wardNumber.isNotEmpty()) wardNumber else ward)
+            }
 
-        if (gender != "all") {
-            sql += " AND gender = ?"
-            args.add(gender)
-        }
-        if (ward != "all") {
-            sql += " AND ward = ?"
-            args.add(ward)
-        }
+            val cursor = db.rawQuery(sql, args.toTypedArray())
 
-        val cursor = db.rawQuery(sql, args.toTypedArray())
-
-        if (cursor.moveToFirst()) {
-            do {
-                results.add(
-                    VoterResult(
-                        fileName = cursor.getString(0),
-                        pageNum = cursor.getInt(1),
-                        data = cursor.getString(2)
+            if (cursor.moveToFirst()) {
+                do {
+                    results.add(
+                        VoterResult(
+                            fileName = cursor.getString(0),
+                            pageNum = cursor.getInt(1),
+                            data = cursor.getString(2)
+                        )
                     )
-                )
-            } while (cursor.moveToNext())
+                } while (cursor.moveToNext())
+            }
+            cursor.close()
+            db.close()
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
-        cursor.close()
-        db.close()
+        
         return results
     }
 }
