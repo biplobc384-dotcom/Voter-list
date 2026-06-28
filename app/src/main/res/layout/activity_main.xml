@@ -1,157 +1,186 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#F4F6F9">
 
-    <LinearLayout
-        android:id="@+id/loadingLayout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:padding="24dp"
-        android:visibility="gone">
-
-        <ProgressBar
-            android:layout_width="56dp"
-            android:layout_height="56dp"
-            android:indeterminateTint="#1A73E8" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="ডাটাবেস লোড হচ্ছে, দয়া করে অপেক্ষা করুন..."
-            android:textColor="#333333"
-            android:textSize="15sp"
-            android:textStyle="bold" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/mainLayout"
+    <FrameLayout
+        android:id="@+id/pageContainer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:padding="16dp">
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp"
-            android:gravity="center"
-            android:text="স্মার্ট ভোটার অনুসন্ধান"
-            android:textColor="#1A73E8"
-            android:textSize="22sp"
-            android:textStyle="bold" />
+        android:layout_above="@+id/bottomNavigationView">
 
         <LinearLayout
+            android:id="@+id/layoutSearch"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@android:color/white"
-            android:elevation="3dp"
+            android:layout_height="match_parent"
             android:orientation="vertical"
-            android:padding="12dp">
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="স্মার্ট ভোটার অনুসন্ধান"
+                android:textColor="#1A73E8"
+                android:textSize="20sp"
+                android:textStyle="bold" />
 
             <EditText
                 android:id="@+id/etSearchQuery"
                 android:layout_width="match_parent"
                 android:layout_height="45dp"
-                android:layout_marginBottom="8dp"
+                android:layout_marginTop="10dp"
                 android:background="@android:drawable/editbox_background"
-                android:hint="ভোটার নম্বর, নাম"
-                android:padding="10dp"
-                android:textSize="14sp" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:orientation="horizontal">
-
-                <EditText
-                    android:id="@+id/etFatherName"
-                    android:layout_width="0dp"
-                    android:layout_height="45dp"
-                    android:layout_marginEnd="4dp"
-                    android:layout_weight="1"
-                    android:background="@android:drawable/editbox_background"
-                    android:hint="পিতার নাম (ঐচ্ছিক)"
-                    android:padding="10dp"
-                    android:textSize="13sp" />
-
-                <EditText
-                    android:id="@+id/etMotherName"
-                    android:layout_width="0dp"
-                    android:layout_height="45dp"
-                    android:layout_marginStart="4dp"
-                    android:layout_weight="1"
-                    android:background="@android:drawable/editbox_background"
-                    android:hint="মাতার নাম (ঐচ্ছিক)"
-                    android:padding="10dp"
-                    android:textSize="13sp" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp"
-                android:orientation="horizontal">
-
-                <EditText
-                    android:id="@+id/etAge"
-                    android:layout_width="0dp"
-                    android:layout_height="45dp"
-                    android:layout_marginEnd="4dp"
-                    android:layout_weight="0.8"
-                    android:background="@android:drawable/editbox_background"
-                    android:hint="বয়স"
-                    android:inputType="number"
-                    android:padding="10dp"
-                    android:textSize="13sp" />
-
-                <Spinner
-                    android:id="@+id/spinnerWard"
-                    android:layout_width="0dp"
-                    android:layout_height="45dp"
-                    android:layout_weight="1.1"
-                    android:entries="@array/ward_options" />
-
-                <Spinner
-                    android:id="@+id/spinnerGender"
-                    android:layout_width="0dp"
-                    android:layout_height="45dp"
-                    android:layout_weight="1.1"
-                    android:entries="@array/gender_options" />
-            </LinearLayout>
+                android:hint="ভোটার নম্বর, নাম অথবা জন্ম সাল"
+                android:padding="10dp" />
 
             <Button
                 android:id="@+id/btnSearch"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
+                android:layout_marginTop="8dp"
                 android:backgroundTint="#1A73E8"
-                android:text="অনুসন্ধান করুন"
-                android:textColor="@android:color/white"
-                android:textSize="16sp"
+                android:text="অনুসন্ধান করুন" />
+
+            <TextView
+                android:id="@+id/tvTotalResults"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:textColor="#00897B"
                 android:textStyle="bold" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="8dp" />
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/tvTotalResults"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:layout_marginBottom="6dp"
-            android:textColor="#00897B"
-            android:textSize="14sp"
-            android:textStyle="bold" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerView"
+        <LinearLayout
+            android:id="@+id/layoutUpload"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="24dp"
+            android:visibility="gone">
 
-    </LinearLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="নতুন পিডিএফ আপলোড করুন"
+                android:textColor="#333"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="center"
+                android:text="পিডিএফ আপলোড করলে আগের ডাটাবেস মুছে নতুন ফাইলটি ডাটাবেসে যুক্ত হবে।"
+                android:textColor="#666" />
+
+            <Button
+                android:id="@+id/btnSelectPdf"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:backgroundTint="#28A745"
+                android:text="পিডিএফ ফাইল সিলেক্ট করুন" />
+
+            <ProgressBar
+                android:id="@+id/uploadProgress"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginTop="20dp"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/tvProgressText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="প্রসেসিং হচ্ছে..."
+                android:textColor="#1A73E8"
+                android:textStyle="bold"
+                android:visibility="gone" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/layoutDevInfo"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="24dp"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Arifur Jaman"
+                android:textColor="#1A73E8"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Lead Developer &amp; Cybersecurity Enthusiast"
+                android:textColor="#555" />
+
+            <Button
+                android:id="@+id/btnTelegram"
+                android:layout_width="220dp"
+                android:layout_height="45dp"
+                android:layout_marginTop="20dp"
+                android:backgroundTint="#0088cc"
+                android:text="Telegram Group" />
+
+            <Button
+                android:id="@+id/btnDiscord"
+                android:layout_width="220dp"
+                android:layout_height="45dp"
+                android:layout_marginTop="6dp"
+                android:backgroundTint="#5865F2"
+                android:text="Discord" />
+
+            <Button
+                android:id="@+id/btnGithub"
+                android:layout_width="220dp"
+                android:layout_height="45dp"
+                android:layout_marginTop="6dp"
+                android:backgroundTint="#333333"
+                android:text="GitHub" />
+
+            <Button
+                android:id="@+id/btnFb"
+                android:layout_width="220dp"
+                android:layout_height="45dp"
+                android:layout_marginTop="6dp"
+                android:backgroundTint="#1877F2"
+                android:text="Facebook" />
+
+            <Button
+                android:id="@+id/btnWhatsapp"
+                android:layout_width="220dp"
+                android:layout_height="45dp"
+                android:layout_marginTop="6dp"
+                android:backgroundTint="#25D366"
+                android:text="WhatsApp" />
+        </LinearLayout>
+    </FrameLayout>
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNavigationView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="@android:color/white"
+        app:menu="@menu/bottom_menu" />
+
 </RelativeLayout>

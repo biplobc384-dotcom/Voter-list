@@ -116,4 +116,25 @@ class DatabaseHelper(private val context: Context) : SQLiteOpenHelper(context, D
 
         return results
     }
+    // পুরনো সব ডাটা মুছে ফেলা
+    fun clearOldDatabase() {
+        val db = this.writableDatabase
+        db.execSQL("DELETE FROM voters")
+        db.close()
+    }
+
+    // পিডিএফ থেকে পাওয়া নতুন ডাটা সেভ করা
+    fun insertPdfData(fileName: String, pageNum: Int, rawText: String, cleanText: String) {
+        val db = this.writableDatabase
+        val values = android.content.ContentValues().apply {
+            put("ward", "Uploaded PDF")
+            put("file_name", fileName)
+            put("page_num", pageNum)
+            put("raw_text", rawText)
+            put("clean_text", cleanText)
+            put("gender", "all")
+        }
+        db.insert("voters", null, values)
+        db.close()
+    }
 }
