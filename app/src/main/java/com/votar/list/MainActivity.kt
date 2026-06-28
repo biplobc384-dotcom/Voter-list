@@ -45,8 +45,14 @@ class MainActivity : AppCompatActivity() {
             true
         }
 
-        // --- সার্চ অপশন লজিক ---
+        // --- সার্চ অপশন লজিক (পুনরুদ্ধার করা ফিল্টার সহ) ---
         val etSearchQuery = findViewById<EditText>(R.id.etSearchQuery)
+        val etFatherName = findViewById<EditText>(R.id.etFatherName)
+        val etMotherName = findViewById<EditText>(R.id.etMotherName)
+        val etAge = findViewById<EditText>(R.id.etAge)
+        val spinnerWard = findViewById<Spinner>(R.id.spinnerWard)
+        val spinnerGender = findViewById<Spinner>(R.id.spinnerGender)
+
         val btnSearch = findViewById<Button>(R.id.btnSearch)
         val tvTotalResults = findViewById<TextView>(R.id.tvTotalResults)
         val recyclerView = findViewById<RecyclerView>(R.id.recyclerView)
@@ -57,11 +63,20 @@ class MainActivity : AppCompatActivity() {
 
         btnSearch.setOnClickListener {
             val query = etSearchQuery.text.toString().trim()
-            if (query.isEmpty()) {
-                Toast.makeText(this, "কিছু লিখুন", Toast.LENGTH_SHORT).show()
+            val fatherName = etFatherName.text.toString().trim()
+            val motherName = etMotherName.text.toString().trim()
+            val age = etAge.text.toString().trim()
+
+            val ward = spinnerWard.selectedItem?.toString() ?: "all"
+            val gender = spinnerGender.selectedItem?.toString() ?: "all"
+
+            if (query.isEmpty() && fatherName.isEmpty() && motherName.isEmpty() && age.isEmpty()) {
+                Toast.makeText(this, "অনুসন্ধানের জন্য অন্তত একটি তথ্য দিন", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
-            val results = dbHelper.searchVoters(query, "", "", "", "all", "all")
+
+            // নতুন ফিল্টারগুলো ডাটবেস হেল্পারে পাঠানো হচ্ছে
+            val results = dbHelper.searchVoters(query, fatherName, motherName, age, ward, gender)
             tvTotalResults.text = "পাওয়া গেছে: ${results.size} জন"
             adapter.updateData(results)
         }

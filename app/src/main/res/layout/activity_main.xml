@@ -21,42 +21,119 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
                 android:gravity="center"
                 android:text="স্মার্ট ভোটার অনুসন্ধান"
                 android:textColor="#1A73E8"
-                android:textSize="20sp"
+                android:textSize="22sp"
                 android:textStyle="bold" />
 
-            <EditText
-                android:id="@+id/etSearchQuery"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="45dp"
-                android:layout_marginTop="10dp"
-                android:background="@android:drawable/editbox_background"
-                android:hint="ভোটার নম্বর, নাম অথবা জন্ম সাল"
-                android:padding="10dp" />
+                android:layout_height="wrap_content"
+                android:background="@android:color/white"
+                android:elevation="3dp"
+                android:orientation="vertical"
+                android:padding="12dp">
 
-            <Button
-                android:id="@+id/btnSearch"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:layout_marginTop="8dp"
-                android:backgroundTint="#1A73E8"
-                android:text="অনুসন্ধান করুন" />
+                <EditText
+                    android:id="@+id/etSearchQuery"
+                    android:layout_width="match_parent"
+                    android:layout_height="45dp"
+                    android:layout_marginBottom="8dp"
+                    android:background="@android:drawable/editbox_background"
+                    android:hint="ভোটার নম্বর, নাম অথবা জন্ম তারিখ"
+                    android:padding="10dp"
+                    android:textSize="14sp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:orientation="horizontal">
+
+                    <EditText
+                        android:id="@+id/etFatherName"
+                        android:layout_width="0dp"
+                        android:layout_height="45dp"
+                        android:layout_marginEnd="4dp"
+                        android:layout_weight="1"
+                        android:background="@android:drawable/editbox_background"
+                        android:hint="পিতার নাম (ঐচ্ছিক)"
+                        android:padding="10dp"
+                        android:textSize="13sp" />
+
+                    <EditText
+                        android:id="@+id/etMotherName"
+                        android:layout_width="0dp"
+                        android:layout_height="45dp"
+                        android:layout_marginStart="4dp"
+                        android:layout_weight="1"
+                        android:background="@android:drawable/editbox_background"
+                        android:hint="মাতার নাম (ঐচ্ছিক)"
+                        android:padding="10dp"
+                        android:textSize="13sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:orientation="horizontal">
+
+                    <EditText
+                        android:id="@+id/etAge"
+                        android:layout_width="0dp"
+                        android:layout_height="45dp"
+                        android:layout_marginEnd="4dp"
+                        android:layout_weight="0.8"
+                        android:background="@android:drawable/editbox_background"
+                        android:hint="জন্ম সাল বা তারিখ (যেমন: ১৯৯৫)"
+                        android:inputType="text"
+                        android:padding="10dp"
+                        android:textSize="13sp" />
+
+                    <Spinner
+                        android:id="@+id/spinnerWard"
+                        android:layout_width="0dp"
+                        android:layout_height="45dp"
+                        android:layout_weight="1.1"
+                        android:entries="@array/ward_options" />
+
+                    <Spinner
+                        android:id="@+id/spinnerGender"
+                        android:layout_width="0dp"
+                        android:layout_height="45dp"
+                        android:layout_weight="1.1"
+                        android:entries="@array/gender_options" />
+                </LinearLayout>
+
+                <Button
+                    android:id="@+id/btnSearch"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:backgroundTint="#1A73E8"
+                    android:text="অনুসন্ধান করুন"
+                    android:textColor="@android:color/white"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/tvTotalResults"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="6dp"
                 android:textColor="#00897B"
+                android:textSize="14sp"
                 android:textStyle="bold" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerView"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginTop="8dp" />
+                android:layout_height="0dp"
+                android:layout_weight="1" />
         </LinearLayout>
 
         <LinearLayout
