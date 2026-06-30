@@ -36,7 +36,14 @@ class MainActivity : AppCompatActivity() {
         PDFBoxResourceLoader.init(applicationContext)
         dbHelper = DatabaseHelper(this)
 
+        // --- নতুন যোগ করা অংশ (ডিফল্ট ডাটাবেস লোড করার জন্য) ---
+        Thread {
+            dbHelper.initDatabaseIfNeeded()
+        }.start()
+        // --------------------------------------------------
+
         val layoutSearch = findViewById<LinearLayout>(R.id.layoutSearch)
+        // ... (বাকি কোড আগের মতোই থাকবে)
         val layoutUpload = findViewById<LinearLayout>(R.id.layoutUpload)
         val layoutDevInfo = findViewById<LinearLayout>(R.id.layoutDevInfo)
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNavigationView)
