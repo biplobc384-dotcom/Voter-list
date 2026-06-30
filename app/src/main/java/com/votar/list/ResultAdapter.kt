@@ -30,4 +30,9 @@ class ResultAdapter(private var resultList: List<VoterResult>) : RecyclerView.Ad
         resultList = newData
         notifyDataSetChanged()
     }
+    fun appendData(newItems: List<VoterResult>) {
+        val startPosition = resultList.size
+        resultList = resultList + newItems
+        notifyItemRangeInserted(startPosition, newItems.size)
+    }
 }

@@ -88,7 +88,7 @@
                         android:layout_marginEnd="4dp"
                         android:layout_weight="0.8"
                         android:background="@android:drawable/editbox_background"
-                        android:hint="জন্ম সাল বা তারিখ (যেমন: ১৯৯৫)"
+                        android:hint="জন্ম সাল (যেমন: ১৯৯৫)"
                         android:inputType="text"
                         android:padding="10dp"
                         android:textSize="13sp" />
@@ -148,7 +148,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="নতুন পিডিএফ আপলোড করুন"
+                android:text="নতুন ফাইল আপলোড করুন"
                 android:textColor="#333"
                 android:textSize="18sp"
                 android:textStyle="bold" />
@@ -158,7 +158,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:gravity="center"
-                android:text="পিডিএফ আপলোড করলে আগের ডাটাবেস মুছে নতুন ফাইলটি ডাটাবেসে যুক্ত হবে।"
+                android:text="পিডিএফ বা ডাটাবেস আপলোড করলে আগের ডাটাবেস মুছে নতুন ফাইলটি যুক্ত হবে।"
                 android:textColor="#666" />
 
             <Button
@@ -168,6 +168,14 @@
                 android:layout_marginTop="20dp"
                 android:backgroundTint="#28A745"
                 android:text="পিডিএফ ফাইল সিলেক্ট করুন" />
+
+            <Button
+                android:id="@+id/btnUploadDb"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:backgroundTint="#FF9800"
+                android:text="ডাটাবেস (.db) ফাইল আপলোড করুন" />
 
             <ProgressBar
                 android:id="@+id/uploadProgress"

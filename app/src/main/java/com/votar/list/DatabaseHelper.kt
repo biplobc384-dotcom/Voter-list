@@ -122,6 +122,105 @@ class DatabaseHelper(private val context: Context) : SQLiteOpenHelper(context, D
         db.execSQL("DELETE FROM voters")
         db.close()
     }
+    fun copyDatabaseFromAssets(context: Context) {
+        val dbFile = context.getDatabasePath("voter_database.db") // আপনার ডাটাবেসের নাম
+        if (!dbFile.exists()) {
+            try {
+                dbFile.parentFile?.mkdirs()
+                context.assets.open("voter_database.db").use { inputStream ->
+                    FileOutputStream(dbFile).use { outputStream ->
+                        inputStream.copyTo(outputStream)
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+    fun searchVotersWithPagination(
+        query: String, father: String, mother: String, age: String,
+        ward: String, gender: String, limit: Int, offset: Int
+    ): List<VoterResult> {
+        val results = mutableListOf<VoterResult>()
+        try {
+            val db = this.readableDatabase
+            var sql = "SELECT file_name, page_num, clean_text FROM voters WHERE 1=1"
+            val args = mutableListOf<String>()
+
+            if (query.isNotEmpty()) {
+                sql += " AND (clean_text LIKE ? OR raw_text LIKE ?)"
+                args.add("%$query%")
+                args.add("%$query%")
+            }
+            if (father.isNotEmpty()) {
+                sql += " AND (clean_text LIKE ? OR raw_text LIKE ?)"
+                args.add("%$father%")
+                args.add("%$father%")
+            }
+            if (mother.isNotEmpty()) {
+                sql += " AND (clean_text LIKE ? OR raw_text LIKE ?)"
+                args.add("%$mother%")
+                args.add("%$mother%")
+            }
+            if (age.isNotEmpty()) {
+                sql += " AND (clean_text LIKE ? OR raw_text LIKE ?)"
+                args.add("%$age%")
+                args.add("%$age%")
+            }
+            if (!gender.contains("সব") && !gender.contains("উভয়") && gender != "all") {
+                sql += " AND gender = ?"
+                val genderValue = if (gender.contains("পুরুষ") || gender.equals("male", true)) "male" else "female"
+                args.add(genderValue)
+            }
+            if (!ward.contains("সব") && !ward.contains("All") && ward != "all") {
+                sql += " AND ward = ?"
+                val wardNumber = ward.replace(Regex("[^0-9]"), "")
+                args.add(if (wardNumber.isNotEmpty()) wardNumber else ward)
+            }
+
+            sql += " LIMIT ? OFFSET ?"
+            args.add(limit.toString())
+            args.add(offset.toString())
+
+            db.rawQuery(sql, args.toTypedArray()).use { cursor ->
+                if (cursor.moveToFirst()) {
+                    do {
+                        results.add(
+                            VoterResult(
+                                fileName = cursor.getString(0),
+                                pageNum = cursor.getInt(1),
+                                data = cursor.getString(2)
+                            )
+                        )
+                    } while (cursor.moveToNext())
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return results
+    }
+    fun getVoterAnalytics(): Map<String, Int> {
+        val stats = mutableMapOf<String, Int>()
+        val db = this.readableDatabase
+
+        // মোট ভোটার সংখ্যা
+        var cursor = db.rawQuery("SELECT COUNT(*) FROM voters", null)
+        if (cursor.moveToFirst()) stats["total"] = cursor.getInt(0)
+        cursor.close()
+
+        // মোট পুরুষ ভোটার
+        cursor = db.rawQuery("SELECT COUNT(*) FROM voters WHERE gender = 'পুরুষ'", null)
+        if (cursor.moveToFirst()) stats["male"] = cursor.getInt(0)
+        cursor.close()
+
+        // মোট মহিলা ভোটার
+        cursor = db.rawQuery("SELECT COUNT(*) FROM voters WHERE gender = 'মহিলা'", null)
+        if (cursor.moveToFirst()) stats["female"] = cursor.getInt(0)
+        cursor.close()
+
+        return stats
+    }
 
     // পিডিএফ থেকে পাওয়া নতুন ডাটা সেভ করা
     fun insertPdfData(fileName: String, pageNum: Int, rawText: String, cleanText: String) {

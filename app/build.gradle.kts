@@ -42,6 +42,7 @@ dependencies {
     implementation("com.google.android.material:material:1.12.0")
     implementation(libs.androidx.recyclerview)
     implementation("com.tom-roush:pdfbox-android:2.0.27.0")
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
     
     // Compose dependencies
     implementation(platform(libs.androidx.compose.bom))
