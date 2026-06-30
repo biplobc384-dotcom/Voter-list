@@ -93,10 +93,17 @@ class MainActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            //  নতুন ফিল্টারগুলো ডাটবেস হেল্পারে পাঠানো হচ্ছে
-            val results = dbHelper.searchVoters(query, fatherName, motherName, age, ward, gender)
+            // পেজিনেশন রিসেট
+            currentPage = 0
+            isLastPage = false
+
+            //  নতুন ফিল্টারগুলো ডাটবেস হেল্পারে পাঠানো হচ্ছে (প্যারামিটার অর্ডার ঠিক করা হয়েছে: gender, ward)
+            val results = dbHelper.searchVoters(query, fatherName, motherName, age, gender, ward)
             tvTotalResults.text = "পাওয়া গেছে: ${results.size} জন"
             adapter.updateData(results)
+            
+            // যেহেতু searchVoters সব ডাটা একবারে আনে, তাই এই কুয়েরির জন্য আর পেজিনেশন লাগবে না
+            isLastPage = true
         }
         val dbPicker = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
             uri?.let { selectedUri ->
@@ -198,15 +205,18 @@ class MainActivity : AppCompatActivity() {
     private fun loadNextPage() {
         isLoading = true
         val offset = currentPage * pageSize
+        
+        // বর্তমান ফিল্টার ভ্যালুগুলো সংগ্রহ করা
+        val query = findViewById<EditText>(R.id.etSearchQuery).text.toString().trim()
+        val father = findViewById<EditText>(R.id.etFatherName).text.toString().trim()
+        val mother = findViewById<EditText>(R.id.etMotherName).text.toString().trim()
+        val age = findViewById<EditText>(R.id.etAge).text.toString().trim()
+        val ward = findViewById<Spinner>(R.id.spinnerWard).selectedItem?.toString() ?: "all"
+        val gender = findViewById<Spinner>(R.id.spinnerGender).selectedItem?.toString() ?: "all"
 
         Thread {
-            val query = ""
-            val father = ""
-            val mother = ""
-            val age = ""
-            val ward = "all"
-            val gender = "all"
-            val nextResults = dbHelper.searchVotersWithPagination(query, father, mother, age, ward, gender, pageSize, offset)
+            // প্যারামিটার অর্ডার ঠিক করা হয়েছে (gender, ward)
+            val nextResults = dbHelper.searchVotersWithPagination(query, father, mother, age, gender, ward, pageSize, offset)
             runOnUiThread {
                 if (nextResults.isEmpty()) {
                     isLastPage = true

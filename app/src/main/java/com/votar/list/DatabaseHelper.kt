@@ -139,7 +139,7 @@ class DatabaseHelper(private val context: Context) : SQLiteOpenHelper(context, D
     }
     fun searchVotersWithPagination(
         query: String, father: String, mother: String, age: String,
-        ward: String, gender: String, limit: Int, offset: Int
+        gender: String, ward: String, limit: Int, offset: Int
     ): List<VoterResult> {
         val results = mutableListOf<VoterResult>()
         try {
