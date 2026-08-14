@@ -100,13 +100,23 @@ class DatabaseHelper(private val context: Context) : SQLiteOpenHelper(context, D
             db.rawQuery(sql, args.toTypedArray()).use { cursor ->
                 if (cursor.moveToFirst()) {
                     do {
-                        results.add(
-                            VoterResult(
-                                fileName = cursor.getString(0),
-                                pageNum = cursor.getInt(1),
-                                data = cursor.getString(2)
-                            )
-                        )
+                        val fileName = cursor.getString(0)
+                        val pageNum = cursor.getInt(1)
+                        val cleanText = cursor.getString(2)
+
+                        // পৃষ্ঠা থেকে আলাদা আলাদা ভোটারের ডাটা বের করা
+                        val voters = splitIntoIndividualVoters(cleanText)
+                        for (voter in voters) {
+                            if (isMatch(voter, query, father, mother, age)) {
+                                results.add(
+                                    VoterResult(
+                                        fileName = fileName,
+                                        pageNum = pageNum,
+                                        data = voter.trim()
+                                    )
+                                )
+                            }
+                        }
                     } while (cursor.moveToNext())
                 }
             }
@@ -185,13 +195,23 @@ class DatabaseHelper(private val context: Context) : SQLiteOpenHelper(context, D
             db.rawQuery(sql, args.toTypedArray()).use { cursor ->
                 if (cursor.moveToFirst()) {
                     do {
-                        results.add(
-                            VoterResult(
-                                fileName = cursor.getString(0),
-                                pageNum = cursor.getInt(1),
-                                data = cursor.getString(2)
-                            )
-                        )
+                        val fileName = cursor.getString(0)
+                        val pageNum = cursor.getInt(1)
+                        val cleanText = cursor.getString(2)
+
+                        // পৃষ্ঠা থেকে আলাদা আলাদা ভোটারের ডাটা বের করা
+                        val voters = splitIntoIndividualVoters(cleanText)
+                        for (voter in voters) {
+                            if (isMatch(voter, query, father, mother, age)) {
+                                results.add(
+                                    VoterResult(
+                                        fileName = fileName,
+                                        pageNum = pageNum,
+                                        data = voter.trim()
+                                    )
+                                )
+                            }
+                        }
                     } while (cursor.moveToNext())
                 }
             }
@@ -235,5 +255,19 @@ class DatabaseHelper(private val context: Context) : SQLiteOpenHelper(context, D
         }
         db.insert("voters", null, values)
         db.close()
+    }
+
+    private fun splitIntoIndividualVoters(text: String): List<String> {
+        // ভোটারদের তথ্যের প্যাটার্ন অনুযায়ী স্প্লিট করা (সংখ্যা. নাম: দিয়ে শুরু হয়)
+        val pattern = Regex("(?=[0-9০-৯]+\\.\\s*নাম:)|(?=নাম:)")
+        return text.split(pattern).filter { it.isNotBlank() && it.contains("নাম:") }
+    }
+
+    private fun isMatch(text: String, query: String, father: String, mother: String, age: String): Boolean {
+        if (query.isNotEmpty() && !text.contains(query, ignoreCase = true)) return false
+        if (father.isNotEmpty() && !text.contains(father, ignoreCase = true)) return false
+        if (mother.isNotEmpty() && !text.contains(mother, ignoreCase = true)) return false
+        if (age.isNotEmpty() && !text.contains(age, ignoreCase = true)) return false
+        return true
     }
 }
