@@ -5,6 +5,12 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.*
+import androidx.appcompat.app.AlertDialog
+import com.github.mikephil.charting.charts.PieChart
+import com.github.mikephil.charting.data.PieData
+import com.github.mikephil.charting.data.PieDataSet
+import com.github.mikephil.charting.data.PieEntry
+import com.github.mikephil.charting.utils.ColorTemplate
 import java.io.FileOutputStream
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -97,13 +103,19 @@ class MainActivity : AppCompatActivity() {
             currentPage = 0
             isLastPage = false
 
+            val searchQueries = listOf(query, fatherName, motherName, age)
+
             //  নতুন ফিল্টারগুলো ডাটবেস হেল্পারে পাঠানো হচ্ছে (প্যারামিটার অর্ডার ঠিক করা হয়েছে: gender, ward)
             val results = dbHelper.searchVoters(query, fatherName, motherName, age, gender, ward)
             tvTotalResults.text = "পাওয়া গেছে: ${results.size} জন"
-            adapter.updateData(results)
+            adapter.updateData(results, searchQueries)
             
             // যেহেতু searchVoters সব ডাটা একবারে আনে, তাই এই কুয়েরির জন্য আর পেজিনেশন লাগবে না
             isLastPage = true
+        }
+
+        findViewById<ImageButton>(R.id.btnShowStats).setOnClickListener {
+            showStatsDialog()
         }
         val dbPicker = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
             uri?.let { selectedUri ->
@@ -202,6 +214,42 @@ class MainActivity : AppCompatActivity() {
         startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
     }
 
+    private fun showStatsDialog() {
+        val stats = dbHelper.getVoterAnalytics()
+        val total = stats["total"] ?: 0
+        if (total == 0) {
+            Toast.makeText(this, "পর্যাপ্ত ডাটা নেই", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val maleCount = stats["male"] ?: 0
+        val femaleCount = stats["female"] ?: 0
+
+        val dialogView: View = layoutInflater.inflate(R.layout.dialog_stats, null)
+        val pieChart = dialogView.findViewById<PieChart>(R.id.pieChart)
+
+        val entries = mutableListOf<PieEntry>()
+        entries.add(PieEntry(maleCount.toFloat(), "পুরুষ"))
+        entries.add(PieEntry(femaleCount.toFloat(), "মহিলা"))
+
+        val dataSet = PieDataSet(entries, "ভোটার পরিসংখ্যান")
+        dataSet.colors = ColorTemplate.MATERIAL_COLORS.toList()
+        dataSet.valueTextSize = 16f
+
+        val data = PieData(dataSet)
+        pieChart.data = data
+        pieChart.description.isEnabled = false
+        pieChart.centerText = "মোট: $total"
+        pieChart.animateY(1000)
+
+        AlertDialog.Builder(this)
+            .setTitle("ভোটার পরিসংখ্যান")
+            .setView(dialogView)
+            .setPositiveButton("ঠিক আছে", null)
+            .create()
+            .show()
+    }
+
     private fun loadNextPage() {
         isLoading = true
         val offset = currentPage * pageSize
@@ -222,7 +270,8 @@ class MainActivity : AppCompatActivity() {
                     isLastPage = true
                 } else {
                     if (currentPage == 0) {
-                        adapter.updateData(nextResults)
+                        val searchQueries = listOf(query, father, mother, age)
+                        adapter.updateData(nextResults, searchQueries)
                     } else {
                         adapter.appendData(nextResults)
                     }

@@ -78,9 +78,12 @@ class DatabaseHelper(private val context: Context) : SQLiteOpenHelper(context, D
             }
 
             if (age.isNotEmpty()) {
-                sql += " AND (clean_text LIKE ? OR raw_text LIKE ?)"
+                val bengaliAge = convertToBengali(age)
+                sql += " AND (clean_text LIKE ? OR raw_text LIKE ? OR clean_text LIKE ? OR raw_text LIKE ?)"
                 args.add("%$age%")
                 args.add("%$age%")
+                args.add("%$bengaliAge%")
+                args.add("%$bengaliAge%")
             }
 
             // জেন্ডার ফিল্টার
@@ -173,9 +176,12 @@ class DatabaseHelper(private val context: Context) : SQLiteOpenHelper(context, D
                 args.add("%$mother%")
             }
             if (age.isNotEmpty()) {
-                sql += " AND (clean_text LIKE ? OR raw_text LIKE ?)"
+                val bengaliAge = convertToBengali(age)
+                sql += " AND (clean_text LIKE ? OR raw_text LIKE ? OR clean_text LIKE ? OR raw_text LIKE ?)"
                 args.add("%$age%")
                 args.add("%$age%")
+                args.add("%$bengaliAge%")
+                args.add("%$bengaliAge%")
             }
             if (!gender.contains("সব") && !gender.contains("উভয়") && gender != "all") {
                 sql += " AND gender = ?"
@@ -230,12 +236,12 @@ class DatabaseHelper(private val context: Context) : SQLiteOpenHelper(context, D
         cursor.close()
 
         // মোট পুরুষ ভোটার
-        cursor = db.rawQuery("SELECT COUNT(*) FROM voters WHERE gender = 'পুরুষ'", null)
+        cursor = db.rawQuery("SELECT COUNT(*) FROM voters WHERE gender = 'male'", null)
         if (cursor.moveToFirst()) stats["male"] = cursor.getInt(0)
         cursor.close()
 
         // মোট মহিলা ভোটার
-        cursor = db.rawQuery("SELECT COUNT(*) FROM voters WHERE gender = 'মহিলা'", null)
+        cursor = db.rawQuery("SELECT COUNT(*) FROM voters WHERE gender = 'female'", null)
         if (cursor.moveToFirst()) stats["female"] = cursor.getInt(0)
         cursor.close()
 
@@ -267,7 +273,22 @@ class DatabaseHelper(private val context: Context) : SQLiteOpenHelper(context, D
         if (query.isNotEmpty() && !text.contains(query, ignoreCase = true)) return false
         if (father.isNotEmpty() && !text.contains(father, ignoreCase = true)) return false
         if (mother.isNotEmpty() && !text.contains(mother, ignoreCase = true)) return false
-        if (age.isNotEmpty() && !text.contains(age, ignoreCase = true)) return false
+        
+        if (age.isNotEmpty()) {
+            val bengaliAge = convertToBengali(age)
+            if (!text.contains(age) && !text.contains(bengaliAge)) return false
+        }
+        
         return true
+    }
+
+    private fun convertToBengali(input: String): String {
+        val english = charArrayOf('0', '1', '2', '3', '4', '5', '6', '7', '8', '9')
+        val bengali = charArrayOf('০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯')
+        var result = input
+        for (i in english.indices) {
+            result = result.replace(english[i], bengali[i])
+        }
+        return result
     }
 }
