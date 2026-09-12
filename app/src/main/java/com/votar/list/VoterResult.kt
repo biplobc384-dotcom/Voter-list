@@ -4,7 +4,7 @@ data class VoterResult(
     val fileName: String,
     val pageNum: Int,
     val data: String,
-    var isBookmarked: Boolean = false
+    var isBookmarked: Boolean = false,
 ) {
     fun getSerial(): String {
         val regexes = listOf(
@@ -13,10 +13,8 @@ data class VoterResult(
             Regex("^([0-9০-৯]+)[.|।\\-]")
         )
         for (r in regexes) {
-            val match = r.find(data)
-            if (match != null) {
-                return match.groupValues[1].trim()
-            }
+            val match = r.find(data) ?: continue
+            return match.groupValues[1].trim()
         }
         return ""
     }
@@ -32,10 +30,8 @@ data class VoterResult(
             Regex("([0-9]{10,17}|[০-৯]{10,17})")
         )
         for (r in regexes) {
-            val match = r.find(data)
-            if (match != null) {
-                return match.groupValues[1].trim()
-            }
+            val match = r.find(data) ?: continue
+            return match.groupValues[1].trim()
         }
         return ""
     }

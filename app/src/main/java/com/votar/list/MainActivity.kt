@@ -2,7 +2,6 @@ package com.votar.list
 
 import android.content.ClipData
 import android.content.ClipboardManager
-import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -349,24 +348,24 @@ class MainActivity : AppCompatActivity() {
         val professionDob = voter.getProfessionAndDob()
         val address = voter.getAddress()
 
-        dialogView.findViewById<TextView>(R.id.tvSlipSerial).text = "ক্রমিক নম্বর: ${if (serial.isNotEmpty()) serial else "N/A"}"
+        dialogView.findViewById<TextView>(R.id.tvSlipSerial).text = "ক্রমিক নম্বর: ${serial.ifEmpty { "N/A" }}"
         dialogView.findViewById<TextView>(R.id.tvSlipFilePage).text = "ফাইল: ${voter.fileName} | পেজ: ${voter.pageNum}"
         dialogView.findViewById<TextView>(R.id.tvSlipName).text = "নাম: $name"
-        dialogView.findViewById<TextView>(R.id.tvSlipVoterId).text = "ভোটার নম্বর: ${if (voterId.isNotEmpty()) voterId else "N/A"}"
-        dialogView.findViewById<TextView>(R.id.tvSlipFather).text = "পিতা: ${if (father.isNotEmpty()) father else "N/A"}"
-        dialogView.findViewById<TextView>(R.id.tvSlipMother).text = "মাতা: ${if (mother.isNotEmpty()) mother else "N/A"}"
-        dialogView.findViewById<TextView>(R.id.tvSlipProfessionDob).text = if (professionDob.isNotEmpty()) professionDob else "পেশা/জন্ম তারিখ: N/A"
-        dialogView.findViewById<TextView>(R.id.tvSlipAddress).text = "ঠিকানা: ${if (address.isNotEmpty()) address else "N/A"}"
+        dialogView.findViewById<TextView>(R.id.tvSlipVoterId).text = "ভোটার নম্বর: ${voterId.ifEmpty { "N/A" }}"
+        dialogView.findViewById<TextView>(R.id.tvSlipFather).text = "পিতা: ${father.ifEmpty { "N/A" }}"
+        dialogView.findViewById<TextView>(R.id.tvSlipMother).text = "মাতা: ${mother.ifEmpty { "N/A" }}"
+        dialogView.findViewById<TextView>(R.id.tvSlipProfessionDob).text = professionDob.ifEmpty { "পেশা/জন্ম তারিখ: N/A" }
+        dialogView.findViewById<TextView>(R.id.tvSlipAddress).text = "ঠিকানা: ${address.ifEmpty { "N/A" }}"
 
         val fullSlipText = """
             🗳️ ভোটার স্লিপ
-            ক্রমিক নম্বর: ${if (serial.isNotEmpty()) serial else "N/A"}
+            ক্রমিক নম্বর: ${serial.ifEmpty { "N/A" }}
             নাম: $name
-            ভোটার নম্বর: ${if (voterId.isNotEmpty()) voterId else "N/A"}
-            পিতা: ${if (father.isNotEmpty()) father else "N/A"}
-            মাতা: ${if (mother.isNotEmpty()) mother else "N/A"}
-            ${if (professionDob.isNotEmpty()) professionDob else "পেশা/জন্ম তারিখ: N/A"}
-            ঠিকানা: ${if (address.isNotEmpty()) address else "N/A"}
+            ভোটার নম্বর: ${voterId.ifEmpty { "N/A" }}
+            পিতা: ${father.ifEmpty { "N/A" }}
+            মাতা: ${mother.ifEmpty { "N/A" }}
+            ${professionDob.ifEmpty { "পেশা/জন্ম তারিখ: N/A" }}
+            ঠিকানা: ${address.ifEmpty { "N/A" }}
             ফাইল: ${voter.fileName} | পেজ: ${voter.pageNum}
         """.trimIndent()
 
@@ -479,7 +478,7 @@ class MainActivity : AppCompatActivity() {
             writer.flush()
             writer.close()
 
-            val uri = FileProvider.getUriForFile(this, "${packageName}.fileprovider", file)
+            val uri = FileProvider.getUriForFile(this, "$packageName.fileprovider", file)
 
             val shareIntent = Intent(Intent.ACTION_SEND).apply {
                 type = "text/csv"
