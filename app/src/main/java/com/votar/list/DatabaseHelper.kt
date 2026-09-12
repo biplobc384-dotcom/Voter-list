@@ -25,7 +25,7 @@ class DatabaseHelper(private val context: Context) : SQLiteOpenHelper(context, D
 
     private fun checkDatabase(): Boolean {
         val dbFile = context.getDatabasePath(DB_NAME)
-        return dbFile.exists() && dbFile.length() > 0
+        return dbFile.exists() && (dbFile.length() > 0)
     }
 
     private fun copyDatabase() {
