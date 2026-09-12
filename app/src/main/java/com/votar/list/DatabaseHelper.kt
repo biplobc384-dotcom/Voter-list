@@ -11,6 +11,11 @@ class DatabaseHelper(private val context: Context) : SQLiteOpenHelper(context, D
         private const val DB_NAME = "voter_database.db"
     }
 
+    override fun onOpen(db: SQLiteDatabase?) {
+        super.onOpen(db)
+        db?.execSQL("CREATE TABLE IF NOT EXISTS bookmarks (id INTEGER PRIMARY KEY AUTOINCREMENT, file_name TEXT, page_num INTEGER, data TEXT, UNIQUE(file_name, page_num, data))")
+    }
+
     // ব্যাকগ্রাউন্ড থ্রেড থেকে কল করার জন্য ফাংশন
     fun initDatabaseIfNeeded() {
         if (!checkDatabase()) {
@@ -39,8 +44,75 @@ class DatabaseHelper(private val context: Context) : SQLiteOpenHelper(context, D
         }
     }
 
-    override fun onCreate(db: SQLiteDatabase?) {}
+    override fun onCreate(db: SQLiteDatabase?) {
+        db?.execSQL("CREATE TABLE IF NOT EXISTS bookmarks (id INTEGER PRIMARY KEY AUTOINCREMENT, file_name TEXT, page_num INTEGER, data TEXT, UNIQUE(file_name, page_num, data))")
+    }
+
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {}
+
+    fun addBookmark(voter: VoterResult): Boolean {
+        return try {
+            val db = this.writableDatabase
+            val values = android.content.ContentValues().apply {
+                put("file_name", voter.fileName)
+                put("page_num", voter.pageNum)
+                put("data", voter.data)
+            }
+            val result = db.insertWithOnConflict("bookmarks", null, values, SQLiteDatabase.CONFLICT_IGNORE)
+            result != -1L
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
+
+    fun removeBookmark(voter: VoterResult): Boolean {
+        return try {
+            val db = this.writableDatabase
+            val rows = db.delete("bookmarks", "file_name = ? AND page_num = ? AND data = ?", arrayOf(voter.fileName, voter.pageNum.toString(), voter.data))
+            rows > 0
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
+
+    fun getBookmarkedKeysSet(): Set<String> {
+        val set = mutableSetOf<String>()
+        try {
+            val db = this.readableDatabase
+            db.rawQuery("SELECT file_name || '_' || page_num || '_' || data FROM bookmarks", null).use { cursor ->
+                if (cursor.moveToFirst()) {
+                    do {
+                        set.add(cursor.getString(0))
+                    } while (cursor.moveToNext())
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return set
+    }
+
+    fun getBookmarkedVoters(): List<VoterResult> {
+        val results = mutableListOf<VoterResult>()
+        try {
+            val db = this.readableDatabase
+            db.rawQuery("SELECT file_name, page_num, data FROM bookmarks ORDER BY id DESC", null).use { cursor ->
+                if (cursor.moveToFirst()) {
+                    do {
+                        val fileName = cursor.getString(0)
+                        val pageNum = cursor.getInt(1)
+                        val data = cursor.getString(2)
+                        results.add(VoterResult(fileName, pageNum, data, isBookmarked = true))
+                    } while (cursor.moveToNext())
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return results
+    }
 
     fun searchVoters(
         query: String,
@@ -51,11 +123,11 @@ class DatabaseHelper(private val context: Context) : SQLiteOpenHelper(context, D
         ward: String
     ): List<VoterResult> {
         val results = mutableListOf<VoterResult>()
+        val bookmarkedKeys = getBookmarkedKeysSet()
 
         try {
             val db = this.readableDatabase
 
-            // ডায়নামিক SQL তৈরি (১=১ দেওয়ার ফলে যেকোনো শর্ত ইচ্ছামতো জোড়া যায়)
             var sql = "SELECT file_name, page_num, clean_text FROM voters WHERE 1=1"
             val args = mutableListOf<String>()
 
@@ -86,14 +158,12 @@ class DatabaseHelper(private val context: Context) : SQLiteOpenHelper(context, D
                 args.add("%$bengaliAge%")
             }
 
-            // জেন্ডার ফিল্টার
             if (!gender.contains("সব") && !gender.contains("উভয়") && gender != "all") {
                 sql += " AND gender = ?"
                 val genderValue = if (gender.contains("পুরুষ") || gender.equals("male", true)) "male" else "female"
                 args.add(genderValue)
             }
 
-            // ওয়ার্ড ফিল্টার
             if (!ward.contains("সব") && !ward.contains("All") && ward != "all") {
                 sql += " AND ward = ?"
                 val wardNumber = ward.replace(Regex("[^0-9]"), "")
@@ -107,15 +177,17 @@ class DatabaseHelper(private val context: Context) : SQLiteOpenHelper(context, D
                         val pageNum = cursor.getInt(1)
                         val cleanText = cursor.getString(2)
 
-                        // পৃষ্ঠা থেকে আলাদা আলাদা ভোটারের ডাটা বের করা
                         val voters = splitIntoIndividualVoters(cleanText)
                         for (voter in voters) {
                             if (isMatch(voter, query, father, mother, age)) {
+                                val trimmed = voter.trim()
+                                val key = "${fileName}_${pageNum}_${trimmed}"
                                 results.add(
                                     VoterResult(
                                         fileName = fileName,
                                         pageNum = pageNum,
-                                        data = voter.trim()
+                                        data = trimmed,
+                                        isBookmarked = bookmarkedKeys.contains(key)
                                     )
                                 )
                             }
@@ -129,14 +201,15 @@ class DatabaseHelper(private val context: Context) : SQLiteOpenHelper(context, D
 
         return results
     }
-    // পুরনো সব ডাটা মুছে ফেলা
+
     fun clearOldDatabase() {
         val db = this.writableDatabase
         db.execSQL("DELETE FROM voters")
         db.close()
     }
+
     fun copyDatabaseFromAssets(context: Context) {
-        val dbFile = context.getDatabasePath("voter_database.db") // আপনার ডাটাবেসের নাম
+        val dbFile = context.getDatabasePath("voter_database.db")
         if (!dbFile.exists()) {
             try {
                 dbFile.parentFile?.mkdirs()
@@ -150,11 +223,14 @@ class DatabaseHelper(private val context: Context) : SQLiteOpenHelper(context, D
             }
         }
     }
+
     fun searchVotersWithPagination(
         query: String, father: String, mother: String, age: String,
         gender: String, ward: String, limit: Int, offset: Int
     ): List<VoterResult> {
         val results = mutableListOf<VoterResult>()
+        val bookmarkedKeys = getBookmarkedKeysSet()
+
         try {
             val db = this.readableDatabase
             var sql = "SELECT file_name, page_num, clean_text FROM voters WHERE 1=1"
@@ -205,15 +281,17 @@ class DatabaseHelper(private val context: Context) : SQLiteOpenHelper(context, D
                         val pageNum = cursor.getInt(1)
                         val cleanText = cursor.getString(2)
 
-                        // পৃষ্ঠা থেকে আলাদা আলাদা ভোটারের ডাটা বের করা
                         val voters = splitIntoIndividualVoters(cleanText)
                         for (voter in voters) {
                             if (isMatch(voter, query, father, mother, age)) {
+                                val trimmed = voter.trim()
+                                val key = "${fileName}_${pageNum}_${trimmed}"
                                 results.add(
                                     VoterResult(
                                         fileName = fileName,
                                         pageNum = pageNum,
-                                        data = voter.trim()
+                                        data = trimmed,
+                                        isBookmarked = bookmarkedKeys.contains(key)
                                     )
                                 )
                             }
@@ -226,21 +304,19 @@ class DatabaseHelper(private val context: Context) : SQLiteOpenHelper(context, D
         }
         return results
     }
+
     fun getVoterAnalytics(): Map<String, Int> {
         val stats = mutableMapOf<String, Int>()
         val db = this.readableDatabase
 
-        // মোট ভোটার সংখ্যা
         var cursor = db.rawQuery("SELECT COUNT(*) FROM voters", null)
         if (cursor.moveToFirst()) stats["total"] = cursor.getInt(0)
         cursor.close()
 
-        // মোট পুরুষ ভোটার
         cursor = db.rawQuery("SELECT COUNT(*) FROM voters WHERE gender = 'male'", null)
         if (cursor.moveToFirst()) stats["male"] = cursor.getInt(0)
         cursor.close()
 
-        // মোট মহিলা ভোটার
         cursor = db.rawQuery("SELECT COUNT(*) FROM voters WHERE gender = 'female'", null)
         if (cursor.moveToFirst()) stats["female"] = cursor.getInt(0)
         cursor.close()
@@ -248,7 +324,6 @@ class DatabaseHelper(private val context: Context) : SQLiteOpenHelper(context, D
         return stats
     }
 
-    // পিডিএফ থেকে পাওয়া নতুন ডাটা সেভ করা
     fun insertPdfData(fileName: String, pageNum: Int, rawText: String, cleanText: String) {
         val db = this.writableDatabase
         val values = android.content.ContentValues().apply {
@@ -264,9 +339,8 @@ class DatabaseHelper(private val context: Context) : SQLiteOpenHelper(context, D
     }
 
     private fun splitIntoIndividualVoters(text: String): List<String> {
-        // ভোটারদের তথ্যের প্যাটার্ন অনুযায়ী স্প্লিট করা (সংখ্যা. নাম: দিয়ে শুরু হয়)
-        val pattern = Regex("(?=[0-9০-৯]+\\.\\s*নাম:)|(?=নাম:)")
-        return text.split(pattern).filter { it.isNotBlank() && it.contains("নাম:") }
+        val replaced = text.replace(Regex("((?:[0-9০-৯]+\\s*[.|।\\-]?\\s*)?(?:নাম:|নামঃ|nam:?))", RegexOption.IGNORE_CASE), "|||\$1")
+        return replaced.split("|||").filter { it.isNotBlank() && (it.contains("নাম", ignoreCase = true) || it.contains("nam", ignoreCase = true)) }
     }
 
     private fun isMatch(text: String, query: String, father: String, mother: String, age: String): Boolean {

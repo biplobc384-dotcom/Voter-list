@@ -5,6 +5,10 @@
         android:icon="@android:drawable/ic_menu_search"
         android:title="অনুসন্ধান" />
     <item
+        android:id="@+id/nav_bookmarks"
+        android:icon="@android:drawable/btn_star_big_on"
+        android:title="সংরক্ষিত" />
+    <item
         android:id="@+id/nav_upload"
         android:icon="@android:drawable/ic_menu_upload"
         android:title="পিডিএফ আপলোড" />
